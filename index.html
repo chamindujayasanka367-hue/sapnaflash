@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Band Show Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            background-image: url('fb cover.jpg');
+      background-size: cover;         /* පුරා screen එකට image එක fit වෙනවා */
+      background-position: center;    /* මැදට align වෙනවා */
+      background-repeat: no-repeat;   /* repeat වෙන්නෙ නැහැ */
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5em, 5vw, 2.5em);
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: clamp(0.8em, 3vw, 1em);
+        }
+
+        .content {
+            padding: 15px;
+        }
+
+        .top-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #6c757d;
+            font-size: 11px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .auto-refresh input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .auto-refresh label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 600;
+            color: #495057;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .table-view {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-done {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-done::before {
+            content: "✓ ";
+            font-size: 16px;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .status-pending::before {
+            content: "⏳ ";
+        }
+
+        .calendar-view {
+            display: none;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .calendar-header h2 {
+            color: #667eea;
+            font-size: clamp(1.2em, 4vw, 1.5em);
+            flex: 1 1 100%;
+            text-align: center;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .calendar-nav .btn {
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 8px 4px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-size: 11px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 50px;
+        }
+
+        .calendar-day:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .calendar-day.has-booking {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-color: #28a745;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: clamp(11px, 2.5vw, 14px);
+        }
+
+        .calendar-day-events {
+            font-size: clamp(8px, 2vw, 10px);
+            margin-top: auto;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            font-size: clamp(1.2em, 4vw, 1.5em);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #dc3545;
+        }
+
+        .detail-row {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .detail-value {
+            color: #212529;
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px 15px;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .success {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .top-controls {
+                padding: 10px;
+            }
+
+            .control-row {
+                flex-direction: column;
+            }
+
+            .auto-refresh {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .view-toggle {
+                width: 100%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            th {
+                font-size: 10px;
+            }
+
+            .calendar-grid {
+                gap: 3px;
+            }
+            
+            .calendar-day {
+                padding: 3px;
+                border-width: 1px;
+                min-height: 45px;
+            }
+
+            .calendar-day-header {
+                padding: 5px 2px;
+                font-size: 10px;
+            }
+
+            .modal-content {
+                padding: 15px;
+                border-radius: 10px;
+                max-height: 90vh;
+            }
+
+            .detail-row {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            .btn {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.75em;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 3px;
+            }
+
+            .calendar-day {
+                min-height: 40px;
+                border-radius: 5px;
+            }
+
+            .calendar-day-header {
+                font-size: 9px;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .calendar-day {
+                min-height: 35px;
+            }
+
+            .modal-content {
+                max-height: 95vh;
+            }
+        }
+
+        /* Touch improvements */
+        @media (hover: none) {
+            .btn:active {
+                transform: scale(0.95);
+            }
+
+            .calendar-day:active {
+                transform: scale(0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 Sapna Flash Show Management</h1>
+            <p>Manage your concert bookings in real-time</p>
+        </div>
+
+        <div class="content">
+            <div class="top-controls">
+                <div class="last-updated" id="lastUpdated">Loading...</div>
+                
+                <div class="control-row">
+                    <div class="auto-refresh">
+                        <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()">
+                        <label for="autoRefresh">Auto Refresh</label>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="btn btn-secondary" onclick="showTableView()">📊 Table</button>
+                        <button class="btn btn-primary" onclick="showCalendarView()">📅 Calendar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tableView" class="table-view">
+                <div class="loading">Loading data</div>
+            </div>
+
+            <div id="calendarView" class="calendar-view">
+                <div class="calendar-header">
+                    <h2 id="currentMonth"></h2>
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary" onclick="previousMonth()">◀ Prev</button>
+                        <button class="btn btn-secondary" onclick="nextMonth()">Next ▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Show Details</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // මෙතන ඔයාගේ Apps Script URL එක දාන්න 👇
+        // =====================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywg7p_qv9Y5_wtxsp5hfwCXMo6fOxBtHKd8IoXVTy-WqEpNNQhHrVHCML3yJSvXxw8GA/exec';
+        // =====================================================
+        
+        let allData = [];
+        let currentDate = new Date();
+        let autoRefreshInterval = null;
+        let savedUrl = APPS_SCRIPT_URL;
+
+        window.onload = function() {
+            if (savedUrl) {
+                loadData();
+                            }
+        };
+
+        function loadData() {
+            const url = savedUrl;
+            
+            if (!url) {
+                alert('කරුණාකර code එකේ APPS_SCRIPT_URL එක දාන්න');
+                return;
+            }
+
+            document.getElementById('tableView').innerHTML = '<div class="loading">Loading data</div>';
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    allData = data;
+                    displayTable();
+                    displayCalendar();
+                    updateLastUpdated();
+                })
+                .catch(error => {
+                    document.getElementById('tableView').innerHTML = 
+                        '<div class="error">❌ Error loading data. Make sure:<br>1. Apps Script deployed as Web App<br>2. Access set to "Anyone"<br>3. URL correct in code</div>';
+                    console.error('Error:', error);
+                });
+        }
+
+        function displayTable() {
+            if (allData.length === 0) {
+                document.getElementById('tableView').innerHTML = '<div class="loading">No data found</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Place</th>
+                            <th>Organizer</th>
+                            <th>Mobile</th>
+                            <th>Total</th>
+                            <th>Advance</th>
+                            <th>To Pay</th>
+                            <th>Sound</th>
+                            <th>Sound Adv</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            allData.forEach(row => {
+                const status = (row['Done'] || row['done'] || 'Pending').toString().trim();
+                const statusClass = status.toLowerCase() === 'done' ? 'status-done' : 'status-pending';
+                
+                html += `
+                    <tr>
+                        <td>${formatDate(row['Booking date']) || ''}</td>
+                        <td>${row['Place'] || ''}</td>
+                        <td>${row['Organizer'] || ''}</td>
+                        <td>${row['Mobile number'] || ''}</td>
+                        <td>${formatNumber(row['Total cost of the concert'])}</td>
+                        <td>${formatNumber(row['Advance payment'])}</td>
+                        <td>${formatNumber(row['Amount to pay'])}</td>
+                        <td>${formatNumber(row['Sound cost'])}</td>
+                        <td>${formatNumber(row['Sound Advance'])}</td>
+                        <td class="${statusClass}">${status}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('tableView').innerHTML = html;
+        }
+
+        function displayCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+
+            const bookingDates = {};
+            allData.forEach(row => {
+                const dateStr = row['Booking date'] || row['booking date'];
+                if (dateStr) {
+                    const date = parseDate(dateStr);
+                    if (date && !isNaN(date)) {
+                        const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                        if (!bookingDates[key]) {
+                            bookingDates[key] = [];
+                        }
+                        bookingDates[key].push(row);
+                    }
+                }
+            });
+
+            let html = `
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            `;
+
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const prevMonthDay = new Date(year, month, -startingDayOfWeek + i + 1);
+                html += `<div class="calendar-day other-month">
+                    <div class="calendar-day-number">${prevMonthDay.getDate()}</div>
+                </div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${year}-${month}-${day}`;
+                const hasBooking = bookingDates[dateKey];
+                const bookingClass = hasBooking ? 'has-booking' : '';
+                
+                html += `<div class="calendar-day ${bookingClass}" onclick="showDayDetails('${dateKey}')">
+                    <div class="calendar-day-number">${day}</div>
+                    ${hasBooking ? `<div class="calendar-day-events">${hasBooking.length} show(s)</div>` : ''}
+                </div>`;
+            }
+
+            const remainingDays = 42 - (startingDayOfWeek + daysInMonth);
+            for (let i = 1; i <= remainingDays; i++) {
+                html += `<div class="calendar-day other-month">
+                    <div class="calendar-day-number">${i}</div>
+                </div>`;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = html;
+        }
+
+        function showDayDetails(dateKey) {
+            const [year, month, day] = dateKey.split('-').map(Number);
+            const bookings = allData.filter(row => {
+                const dateStr = row['Booking date'] || row['booking date'];
+                if (dateStr) {
+                    const date = parseDate(dateStr);
+                    return date && date.getFullYear() === year && 
+                           date.getMonth() === month && 
+                           date.getDate() === day;
+                }
+                return false;
+            });
+
+            if (bookings.length === 0) {
+                return;
+            }
+
+            let html = '';
+            bookings.forEach((booking, index) => {
+                const status = (booking['Done'] || booking['done'] || 'Pending').toString().trim();
+                const statusClass = status.toLowerCase() === 'done' ? 'status-done' : 'status-pending';
+                
+                html += `
+                    ${index > 0 ? '<hr style="margin: 15px 0; border: 1px solid #dee2e6;">' : ''}
+                    <div class="detail-row">
+                        <div class="detail-label">📅 Booking Date:</div>
+                        <div class="detail-value">${formatDate(booking['Booking date']) || ''}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">📍 Place:</div>
+                        <div class="detail-value">${booking['Place'] || ''}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">👤 Organizer:</div>
+                        <div class="detail-value">${booking['Organizer'] || ''}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">📞 Mobile:</div>
+                        <div class="detail-value"><a href="tel:${booking['Mobile number']}" style="color: #667eea; text-decoration: none;">${booking['Mobile number'] || ''}</a></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">💰 Total Cost:</div>
+                        <div class="detail-value">Rs. ${formatNumber(booking['Total cost of the concert'])}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">💵 Advance Payment:</div>
+                        <div class="detail-value">Rs. ${formatNumber(booking['Advance payment'])}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">💸 Amount to Pay:</div>
+                        <div class="detail-value">Rs. ${formatNumber(booking['Amount to pay'])}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">🔊 Sound Cost:</div>
+                        <div class="detail-value">Rs. ${formatNumber(booking['Sound cost'])}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">🔊 Sound Advance:</div>
+                        <div class="detail-value">Rs. ${formatNumber(booking['Sound Advance'])}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">✅ Status:</div>
+                        <div class="detail-value ${statusClass}">${status}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'modal') {
+                document.getElementById('modal').classList.remove('active');
+            }
+        }
+
+        function showTableView() {
+            document.getElementById('tableView').style.display = 'block';
+            document.getElementById('calendarView').style.display = 'none';
+        }
+
+        function showCalendarView() {
+            document.getElementById('tableView').style.display = 'none';
+            document.getElementById('calendarView').style.display = 'block';
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            displayCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            displayCalendar();
+        }
+
+        function toggleAutoRefresh() {
+            const checkbox = document.getElementById('autoRefresh');
+            if (checkbox.checked) {
+                autoRefreshInterval = setInterval(loadData, 30000);
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        function updateLastUpdated() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            const dateStr = now.toLocaleDateString('en-GB');
+            document.getElementById('lastUpdated').textContent = `Updated: ${dateStr} ${timeStr}`;
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            
+            if (typeof dateStr === 'object' && dateStr instanceof Date) {
+                return dateStr;
+            }
+            
+            const str = dateStr.toString();
+            
+            let date = new Date(str);
+            if (!isNaN(date)) return date;
+            
+            const parts = str.split(/[-/]/);
+            if (parts.length === 3) {
+                const year = parseInt(parts[2]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parseInt(parts[0]);
+                date = new Date(year, month, day);
+                if (!isNaN(date)) return date;
+            }
+            
+            return null;
+        }
+
+        function formatDate(dateStr) {
+            const date = parseDate(dateStr);
+            if (!date || isNaN(date)) return dateStr;
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function formatNumber(num) {
+            if (!num) return '0';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function showSuccess(message) {
+            const div = document.createElement('div');
+            div.className = 'success';
+            div.textContent = message;
+            document.querySelector('.content').insertBefore(div, document.querySelector('.content').firstChild);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // Prevent zoom on double tap for iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
