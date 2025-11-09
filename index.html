@@ -17,9 +17,9 @@
             min-height: 100vh;
             padding: 10px;
             background-image: url('fb cover.jpg');
-      background-size: cover;         /* පුරා screen එකට image එක fit වෙනවා */
-      background-position: center;    /* මැදට align වෙනවා */
-      background-repeat: no-repeat;   /* repeat වෙන්නෙ නැහැ */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .container {
@@ -58,7 +58,7 @@
             gap: 10px;
             margin-bottom: 15px;
             padding: 15px;
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.85);
             border-radius: 10px;
         }
 
@@ -67,7 +67,7 @@
             color: #6c757d;
             font-size: 11px;
             padding: 8px;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 5px;
             border: 1px solid #dee2e6;
         }
@@ -77,33 +77,6 @@
             gap: 10px;
             align-items: center;
             flex-wrap: wrap;
-        }
-
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            background: white;
-            border-radius: 8px;
-            border: 2px solid #dee2e6;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .auto-refresh input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .auto-refresh label {
-            cursor: pointer;
-            margin: 0;
-            font-weight: 600;
-            color: #495057;
-            font-size: 13px;
-            white-space: nowrap;
         }
 
         .view-toggle {
@@ -156,6 +129,7 @@
             border-collapse: collapse;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             font-size: 14px;
+            background: rgba(255, 255, 255, 0.85);
         }
 
         thead {
@@ -184,10 +158,17 @@
 
         tbody tr {
             transition: background 0.3s;
+            background: rgba(255, 255, 255, 0.8);
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.95);
+        }
+
+        .date-cell {
+            font-weight: 700;
+            font-size: 14px;
+            color: #667eea;
         }
 
         .status-done {
@@ -219,7 +200,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding: 15px;
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.85);
             border-radius: 10px;
             flex-wrap: wrap;
             gap: 10px;
@@ -242,6 +223,27 @@
         .calendar-nav .btn {
             flex: 1;
             max-width: 150px;
+        }
+
+        .calendar-months-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .month-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .month-section h3 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
         }
 
         .calendar-grid {
@@ -271,7 +273,9 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            align-items: center;
             min-height: 50px;
+            position: relative;
         }
 
         .calendar-day:hover {
@@ -288,6 +292,7 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             border-color: #28a745;
+            font-weight: 600;
         }
 
         .calendar-day-number {
@@ -296,9 +301,43 @@
             font-size: clamp(11px, 2.5vw, 14px);
         }
 
-        .calendar-day-events {
-            font-size: clamp(8px, 2vw, 10px);
-            margin-top: auto;
+        .calendar-day-place {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            margin-bottom: 8px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+        }
+
+        .calendar-day-place::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #28a745;
+        }
+
+        .calendar-day.has-booking:hover .calendar-day-place {
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal {
@@ -419,16 +458,6 @@
             line-height: 1.5;
         }
 
-        .success {
-            background: #28a745;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-        }
-
-        /* Mobile optimizations */
         @media (max-width: 768px) {
             body {
                 padding: 5px;
@@ -452,11 +481,6 @@
 
             .control-row {
                 flex-direction: column;
-            }
-
-            .auto-refresh {
-                width: 100%;
-                justify-content: center;
             }
 
             .view-toggle {
@@ -488,6 +512,17 @@
             .calendar-day-header {
                 padding: 5px 2px;
                 font-size: 10px;
+            }
+
+            .calendar-day-place {
+                font-size: 11px;
+                max-width: 180px;
+                padding: 6px 10px;
+            }
+
+            .calendar-day.has-booking:active .calendar-day-place {
+                opacity: 1;
+                visibility: visible;
             }
 
             .modal-content {
@@ -534,7 +569,6 @@
             }
         }
 
-        /* Landscape mobile */
         @media (max-width: 900px) and (orientation: landscape) {
             .calendar-day {
                 min-height: 35px;
@@ -545,7 +579,6 @@
             }
         }
 
-        /* Touch improvements */
         @media (hover: none) {
             .btn:active {
                 transform: scale(0.95);
@@ -569,10 +602,6 @@
                 <div class="last-updated" id="lastUpdated">Loading...</div>
                 
                 <div class="control-row">
-                    <div class="auto-refresh">
-                        <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()">
-                        <label for="autoRefresh">Auto Refresh</label>
-                    </div>
                     <div class="view-toggle">
                         <button class="btn btn-secondary" onclick="showTableView()">📊 Table</button>
                         <button class="btn btn-primary" onclick="showCalendarView()">📅 Calendar</button>
@@ -586,13 +615,13 @@
 
             <div id="calendarView" class="calendar-view">
                 <div class="calendar-header">
-                    <h2 id="currentMonth"></h2>
+                    <h2>📅 3 Month Calendar View</h2>
                     <div class="calendar-nav">
-                        <button class="btn btn-secondary" onclick="previousMonth()">◀ Prev</button>
-                        <button class="btn btn-secondary" onclick="nextMonth()">Next ▶</button>
+                        <button class="btn btn-secondary" onclick="previousMonths()">◀ Previous</button>
+                        <button class="btn btn-secondary" onclick="nextMonths()">Next ▶</button>
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
+                <div id="calendarMonthsContainer" class="calendar-months-container"></div>
             </div>
         </div>
     </div>
@@ -608,21 +637,16 @@
     </div>
 
     <script>
-        // =====================================================
-        // මෙතන ඔයාගේ Apps Script URL එක දාන්න 👇
-        // =====================================================
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywg7p_qv9Y5_wtxsp5hfwCXMo6fOxBtHKd8IoXVTy-WqEpNNQhHrVHCML3yJSvXxw8GA/exec';
-        // =====================================================
         
         let allData = [];
         let currentDate = new Date();
-        let autoRefreshInterval = null;
         let savedUrl = APPS_SCRIPT_URL;
 
         window.onload = function() {
             if (savedUrl) {
                 loadData();
-                            }
+            }
         };
 
         function loadData() {
@@ -679,15 +703,19 @@
                 const status = (row['Done'] || row['done'] || 'Pending').toString().trim();
                 const statusClass = status.toLowerCase() === 'done' ? 'status-done' : 'status-pending';
                 
+                const total = parseFloat(row['Total cost of the concert']) || 0;
+                const advance = parseFloat(row['Advance payment']) || 0;
+                const toPay = total - advance;
+                
                 html += `
                     <tr>
-                        <td>${formatDate(row['Booking date']) || ''}</td>
+                        <td class="date-cell">${formatDate(row['Booking date']) || ''}</td>
                         <td>${row['Place'] || ''}</td>
                         <td>${row['Organizer'] || ''}</td>
                         <td>${row['Mobile number'] || ''}</td>
-                        <td>${formatNumber(row['Total cost of the concert'])}</td>
-                        <td>${formatNumber(row['Advance payment'])}</td>
-                        <td>${formatNumber(row['Amount to pay'])}</td>
+                        <td>${formatNumber(total)}</td>
+                        <td>${formatNumber(advance)}</td>
+                        <td>${formatNumber(toPay)}</td>
                         <td>${formatNumber(row['Sound cost'])}</td>
                         <td>${formatNumber(row['Sound Advance'])}</td>
                         <td class="${statusClass}">${status}</td>
@@ -700,14 +728,22 @@
         }
 
         function displayCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
+            const container = document.getElementById('calendarMonthsContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                const displayDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+                container.innerHTML += generateMonthCalendar(displayDate);
+            }
+        }
+
+        function generateMonthCalendar(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
             
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                               'July', 'August', 'September', 'October', 'November', 'December'];
             
-            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
-
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const daysInMonth = lastDay.getDate();
@@ -717,9 +753,9 @@
             allData.forEach(row => {
                 const dateStr = row['Booking date'] || row['booking date'];
                 if (dateStr) {
-                    const date = parseDate(dateStr);
-                    if (date && !isNaN(date)) {
-                        const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                    const bookingDate = parseDate(dateStr);
+                    if (bookingDate && !isNaN(bookingDate)) {
+                        const key = `${bookingDate.getFullYear()}-${bookingDate.getMonth()}-${bookingDate.getDate()}`;
                         if (!bookingDates[key]) {
                             bookingDates[key] = [];
                         }
@@ -729,19 +765,21 @@
             });
 
             let html = `
-                <div class="calendar-day-header">Sun</div>
-                <div class="calendar-day-header">Mon</div>
-                <div class="calendar-day-header">Tue</div>
-                <div class="calendar-day-header">Wed</div>
-                <div class="calendar-day-header">Thu</div>
-                <div class="calendar-day-header">Fri</div>
-                <div class="calendar-day-header">Sat</div>
+                <div class="month-section">
+                    <h3>${monthNames[month]} ${year}</h3>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
             `;
 
             for (let i = 0; i < startingDayOfWeek; i++) {
-                const prevMonthDay = new Date(year, month, -startingDayOfWeek + i + 1);
                 html += `<div class="calendar-day other-month">
-                    <div class="calendar-day-number">${prevMonthDay.getDate()}</div>
+                    <div class="calendar-day-number"></div>
                 </div>`;
             }
 
@@ -749,21 +787,24 @@
                 const dateKey = `${year}-${month}-${day}`;
                 const hasBooking = bookingDates[dateKey];
                 const bookingClass = hasBooking ? 'has-booking' : '';
+                const place = hasBooking && hasBooking[0] ? hasBooking[0]['Place'] : '';
                 
                 html += `<div class="calendar-day ${bookingClass}" onclick="showDayDetails('${dateKey}')">
                     <div class="calendar-day-number">${day}</div>
-                    ${hasBooking ? `<div class="calendar-day-events">${hasBooking.length} show(s)</div>` : ''}
+                    ${hasBooking ? `<div class="calendar-day-place">${place}</div>` : ''}
                 </div>`;
             }
 
-            const remainingDays = 42 - (startingDayOfWeek + daysInMonth);
+            const totalCells = startingDayOfWeek + daysInMonth;
+            const remainingDays = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
             for (let i = 1; i <= remainingDays; i++) {
                 html += `<div class="calendar-day other-month">
-                    <div class="calendar-day-number">${i}</div>
+                    <div class="calendar-day-number"></div>
                 </div>`;
             }
 
-            document.getElementById('calendarGrid').innerHTML = html;
+            html += '</div></div>';
+            return html;
         }
 
         function showDayDetails(dateKey) {
@@ -788,6 +829,10 @@
                 const status = (booking['Done'] || booking['done'] || 'Pending').toString().trim();
                 const statusClass = status.toLowerCase() === 'done' ? 'status-done' : 'status-pending';
                 
+                const total = parseFloat(booking['Total cost of the concert']) || 0;
+                const advance = parseFloat(booking['Advance payment']) || 0;
+                const toPay = total - advance;
+                
                 html += `
                     ${index > 0 ? '<hr style="margin: 15px 0; border: 1px solid #dee2e6;">' : ''}
                     <div class="detail-row">
@@ -808,15 +853,15 @@
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">💰 Total Cost:</div>
-                        <div class="detail-value">Rs. ${formatNumber(booking['Total cost of the concert'])}</div>
+                        <div class="detail-value">Rs. ${formatNumber(total)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">💵 Advance Payment:</div>
-                        <div class="detail-value">Rs. ${formatNumber(booking['Advance payment'])}</div>
+                        <div class="detail-value">Rs. ${formatNumber(advance)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">💸 Amount to Pay:</div>
-                        <div class="detail-value">Rs. ${formatNumber(booking['Amount to pay'])}</div>
+                        <div class="detail-value">Rs. ${formatNumber(toPay)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">🔊 Sound Cost:</div>
@@ -853,26 +898,14 @@
             document.getElementById('calendarView').style.display = 'block';
         }
 
-        function previousMonth() {
+        function previousMonths() {
             currentDate.setMonth(currentDate.getMonth() - 1);
             displayCalendar();
         }
 
-        function nextMonth() {
+        function nextMonths() {
             currentDate.setMonth(currentDate.getMonth() + 1);
             displayCalendar();
-        }
-
-        function toggleAutoRefresh() {
-            const checkbox = document.getElementById('autoRefresh');
-            if (checkbox.checked) {
-                autoRefreshInterval = setInterval(loadData, 30000);
-            } else {
-                if (autoRefreshInterval) {
-                    clearInterval(autoRefreshInterval);
-                    autoRefreshInterval = null;
-                }
-            }
         }
 
         function updateLastUpdated() {
@@ -924,15 +957,6 @@
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        function showSuccess(message) {
-            const div = document.createElement('div');
-            div.className = 'success';
-            div.textContent = message;
-            document.querySelector('.content').insertBefore(div, document.querySelector('.content').firstChild);
-            setTimeout(() => div.remove(), 3000);
-        }
-
-        // Prevent zoom on double tap for iOS
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
             const now = (new Date()).getTime();
