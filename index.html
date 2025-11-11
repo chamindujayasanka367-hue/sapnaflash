@@ -16,10 +16,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
-            background-image: url('fb cover.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
         }
 
         .container {
@@ -119,6 +115,31 @@
             transform: translateY(-2px);
         }
 
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
         .table-view {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -165,6 +186,10 @@
             background: rgba(248, 249, 250, 0.95);
         }
 
+        tbody tr.edit-mode {
+            background: #fff3cd;
+        }
+
         .date-cell {
             font-weight: 700;
             font-size: 14px;
@@ -188,6 +213,20 @@
 
         .status-pending::before {
             content: "⏳ ";
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
         }
 
         .calendar-view {
@@ -430,6 +469,32 @@
             word-break: break-word;
         }
 
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 13px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         .loading {
             text-align: center;
             padding: 30px 15px;
@@ -456,6 +521,21 @@
             margin: 15px 0;
             font-size: 14px;
             line-height: 1.5;
+        }
+
+        .success {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .add-show-btn-container {
+            margin-top: 15px;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
@@ -488,104 +568,25 @@
             }
 
             table {
-                font-size: 12px;
+                font-size: 11px;
             }
 
             th, td {
-                padding: 8px 4px;
+                padding: 6px 4px;
             }
 
             th {
-                font-size: 10px;
-            }
-
-            .calendar-grid {
-                gap: 3px;
-            }
-            
-            .calendar-day {
-                padding: 3px;
-                border-width: 1px;
-                min-height: 45px;
-            }
-
-            .calendar-day-header {
-                padding: 5px 2px;
-                font-size: 10px;
-            }
-
-            .calendar-day-place {
-                font-size: 11px;
-                max-width: 180px;
-                padding: 6px 10px;
-            }
-
-            .calendar-day.has-booking:active .calendar-day-place {
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .modal-content {
-                padding: 15px;
-                border-radius: 10px;
-                max-height: 90vh;
-            }
-
-            .detail-row {
-                padding: 10px;
-                margin-bottom: 10px;
+                font-size: 9px;
             }
 
             .btn {
-                padding: 10px 15px;
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.3em;
-            }
-
-            .header p {
-                font-size: 0.75em;
-            }
-
-            table {
+                padding: 8px 12px;
                 font-size: 11px;
             }
 
-            th, td {
-                padding: 6px 3px;
-            }
-
-            .calendar-day {
-                min-height: 40px;
-                border-radius: 5px;
-            }
-
-            .calendar-day-header {
-                font-size: 9px;
-            }
-        }
-
-        @media (max-width: 900px) and (orientation: landscape) {
-            .calendar-day {
-                min-height: 35px;
-            }
-
-            .modal-content {
-                max-height: 95vh;
-            }
-        }
-
-        @media (hover: none) {
-            .btn:active {
-                transform: scale(0.95);
-            }
-
-            .calendar-day:active {
-                transform: scale(0.95);
+            .btn-sm {
+                padding: 5px 8px;
+                font-size: 10px;
             }
         }
     </style>
@@ -606,6 +607,7 @@
                         <button class="btn btn-secondary" onclick="showTableView()">📊 Table</button>
                         <button class="btn btn-primary" onclick="showCalendarView()">📅 Calendar</button>
                     </div>
+                    <button class="btn btn-success" onclick="refreshData()">🔄 Refresh</button>
                 </div>
             </div>
             
@@ -626,57 +628,93 @@
         </div>
     </div>
 
-    <div id="modal" class="modal" onclick="closeModal(event)">
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>🔒 Enter Password</h3>
+                <button class="close-btn" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password:</label>
+                <input type="password" id="passwordInput" class="form-control" placeholder="Enter password" onkeypress="if(event.key==='Enter') verifyPassword()">
+            </div>
+            <button class="btn btn-primary" onclick="verifyPassword()" style="width: 100%;">Verify</button>
+            <div id="passwordError" style="color: white; background: #dc3545; padding: 10px; border-radius: 5px; margin-top: 10px; display: none; text-align: center;"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Show Modal -->
+    <div id="showModal" class="modal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="showModalTitle">➕ Add New Show</h3>
+                <button class="close-btn" onclick="closeShowModal()">&times;</button>
+            </div>
+            <div id="showModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal" onclick="closeDetailsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h3>Show Details</h3>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
             </div>
-            <div id="modalBody"></div>
+            <div id="detailsModalBody"></div>
         </div>
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywg7p_qv9Y5_wtxsp5hfwCXMo6fOxBtHKd8IoXVTy-WqEpNNQhHrVHCML3yJSvXxw8GA/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbDPsYZYt8KqhaOBRIg41HSf6aweJe00wR7SY8lPfXcFmrT_bFi7jH37myH7lqRQ-8-w/exec'; //
         
         let allData = [];
         let currentDate = new Date();
-        let savedUrl = APPS_SCRIPT_URL;
+        let editingRowIndex = null;
+        let isPasswordVerified = false;
 
         window.onload = function() {
-            if (savedUrl) {
-                loadData();
-            }
+            loadData();
         };
 
         function loadData() {
-            const url = savedUrl;
-            
-            if (!url) {
-                alert('කරුණාකර code එකේ APPS_SCRIPT_URL එක දාන්න');
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+                document.getElementById('tableView').innerHTML = 
+                    '<div class="error">❌ කරුණාකර APPS_SCRIPT_URL එක code එකේ දාන්න</div>';
                 return;
             }
 
             document.getElementById('tableView').innerHTML = '<div class="loading">Loading data</div>';
 
-            fetch(url)
+            fetch(APPS_SCRIPT_URL + '?action=getData')
                 .then(response => response.json())
-                .then(data => {
-                    allData = data;
-                    displayTable();
-                    displayCalendar();
-                    updateLastUpdated();
+                .then(result => {
+                    if (result.success) {
+                        allData = result.data;
+                        displayTable();
+                        displayCalendar();
+                        updateLastUpdated();
+                    } else {
+                        throw new Error(result.error || 'Failed to load data');
+                    }
                 })
                 .catch(error => {
                     document.getElementById('tableView').innerHTML = 
-                        '<div class="error">❌ Error loading data. Make sure:<br>1. Apps Script deployed as Web App<br>2. Access set to "Anyone"<br>3. URL correct in code</div>';
+                        '<div class="error">❌ Error loading data: ' + error.message + '</div>';
                     console.error('Error:', error);
                 });
         }
 
+        function refreshData() {
+            loadData();
+        }
+
         function displayTable() {
             if (allData.length === 0) {
-                document.getElementById('tableView').innerHTML = '<div class="loading">No data found</div>';
+                document.getElementById('tableView').innerHTML = 
+                    '<div class="loading">No data found</div>' +
+                    '<div class="add-show-btn-container"><button class="btn btn-success" onclick="openAddShowModal()">➕ Add First Show</button></div>';
                 return;
             }
 
@@ -694,12 +732,13 @@
                             <th>Sound</th>
                             <th>Sound Adv</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
-            allData.forEach(row => {
+            allData.forEach((row, index) => {
                 const status = (row['Done'] || row['done'] || 'Pending').toString().trim();
                 const statusClass = status.toLowerCase() === 'done' ? 'status-done' : 'status-pending';
                 
@@ -708,7 +747,7 @@
                 const toPay = total - advance;
                 
                 html += `
-                    <tr>
+                    <tr id="row-${index}">
                         <td class="date-cell">${formatDate(row['Booking date']) || ''}</td>
                         <td>${row['Place'] || ''}</td>
                         <td>${row['Organizer'] || ''}</td>
@@ -719,12 +758,251 @@
                         <td>${formatNumber(row['Sound cost'])}</td>
                         <td>${formatNumber(row['Sound Advance'])}</td>
                         <td class="${statusClass}">${status}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal(${index})">✏️ Edit</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
 
             html += '</tbody></table>';
+            html += '<div class="add-show-btn-container"><button class="btn btn-success" onclick="openAddShowModal()">➕ Next Show</button></div>';
+            
             document.getElementById('tableView').innerHTML = html;
+        }
+
+        function openEditModal(index) {
+            editingRowIndex = index;
+            document.getElementById('passwordModal').classList.add('active');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordError').style.display = 'none';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            editingRowIndex = null;
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Please enter password!';
+                document.getElementById('passwordError').style.display = 'block';
+                return;
+            }
+            
+            fetch(APPS_SCRIPT_URL + '?action=verifyPassword&password=' + encodeURIComponent(password))
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.valid) {
+                        isPasswordVerified = true;
+                        closePasswordModal();
+                        // Edit form එක open කරන්න
+                        if (editingRowIndex !== null) {
+                            const index = editingRowIndex;
+                            editingRowIndex = null;
+                            setTimeout(() => {
+                                const row = allData[index];
+                                
+                                // Date format කරන්න (YYYY-MM-DD format එකට)
+                                let formattedDate = '';
+                                if (row['Booking date']) {
+                                    const date = parseDate(row['Booking date']);
+                                    if (date && !isNaN(date)) {
+                                        const year = date.getFullYear();
+                                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                                        const day = String(date.getDate()).padStart(2, '0');
+                                        formattedDate = `${year}-${month}-${day}`;
+                                    }
+                                }
+                                
+                                const formHtml = `
+                                    <div class="form-group">
+                                        <label class="form-label">📅 Booking Date:</label>
+                                        <input type="date" id="bookingDate" class="form-control" value="${formattedDate}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">📍 Place:</label>
+                                        <input type="text" id="place" class="form-control" value="${row['Place'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">👤 Organizer:</label>
+                                        <input type="text" id="organizer" class="form-control" value="${row['Organizer'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">📞 Mobile Number:</label>
+                                        <input type="tel" id="mobile" class="form-control" value="${row['Mobile number'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">💰 Total Cost:</label>
+                                        <input type="number" id="totalCost" class="form-control" value="${row['Total cost of the concert'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">💵 Advance Payment:</label>
+                                        <input type="number" id="advancePayment" class="form-control" value="${row['Advance payment'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">🔊 Sound Cost:</label>
+                                        <input type="number" id="soundCost" class="form-control" value="${row['Sound cost'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">🔊 Sound Advance:</label>
+                                        <input type="number" id="soundAdvance" class="form-control" value="${row['Sound Advance'] || ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">✅ Status:</label>
+                                        <select id="status" class="form-control">
+                                            <option value="Pending" ${(row['Done'] || 'Pending') === 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="Done" ${(row['Done'] || '') === 'Done' ? 'selected' : ''}>Done</option>
+                                        </select>
+                                    </div>
+                                `;
+                                
+                                document.getElementById('showModalTitle').textContent = '✏️ Edit Show';
+                                document.getElementById('showModalBody').innerHTML = formHtml + 
+                                    `<button class="btn btn-primary" onclick="saveEdit(${index})" style="width: 100%; margin-top: 15px;">💾 Save Changes</button>`;
+                                document.getElementById('showModal').classList.add('active');
+                            }, 100);
+                        }
+                    } else {
+                        document.getElementById('passwordError').textContent = '❌ Incorrect password!';
+                        document.getElementById('passwordError').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('passwordError').textContent = '❌ Error: ' + error.message;
+                    document.getElementById('passwordError').style.display = 'block';
+                    console.error('Password verification error:', error);
+                });
+        }
+
+        function openAddShowModal() {
+            editingRowIndex = null;
+            const formHtml = generateShowForm({});
+            
+            document.getElementById('showModalTitle').textContent = '➕ Add New Show';
+            document.getElementById('showModalBody').innerHTML = formHtml + 
+                '<button class="btn btn-success" onclick="saveNewShow()" style="width: 100%; margin-top: 15px;">💾 Save Show</button>';
+            document.getElementById('showModal').classList.add('active');
+        }
+
+        function generateShowForm(data) {
+            return `
+                <div class="form-group">
+                    <label class="form-label">📅 Booking Date:</label>
+                    <input type="date" id="bookingDate" class="form-control" value="${data['Booking date'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📍 Place:</label>
+                    <input type="text" id="place" class="form-control" value="${data['Place'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">👤 Organizer:</label>
+                    <input type="text" id="organizer" class="form-control" value="${data['Organizer'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📞 Mobile Number:</label>
+                    <input type="tel" id="mobile" class="form-control" value="${data['Mobile number'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💰 Total Cost:</label>
+                    <input type="number" id="totalCost" class="form-control" value="${data['Total cost of the concert'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 Advance Payment:</label>
+                    <input type="number" id="advancePayment" class="form-control" value="${data['Advance payment'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔊 Sound Cost:</label>
+                    <input type="number" id="soundCost" class="form-control" value="${data['Sound cost'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔊 Sound Advance:</label>
+                    <input type="number" id="soundAdvance" class="form-control" value="${data['Sound Advance'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">✅ Status:</label>
+                    <select id="status" class="form-control">
+                        <option value="Pending" ${(data['Done'] || 'Pending') === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Done" ${(data['Done'] || '') === 'Done' ? 'selected' : ''}>Done</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function getFormData() {
+            return {
+                'Booking date': document.getElementById('bookingDate').value,
+                'Place': document.getElementById('place').value,
+                'Organizer': document.getElementById('organizer').value,
+                'Mobile number': document.getElementById('mobile').value,
+                'Total cost of the concert': document.getElementById('totalCost').value,
+                'Advance payment': document.getElementById('advancePayment').value,
+                'Sound cost': document.getElementById('soundCost').value,
+                'Sound Advance': document.getElementById('soundAdvance').value,
+                'Done': document.getElementById('status').value
+            };
+        }
+
+        function saveEdit(index) {
+            const formData = getFormData();
+            const row = allData[index];
+            
+            const params = new URLSearchParams({
+                action: 'updateRow',
+                _rowIndex: row._rowIndex,
+                ...formData
+            });
+
+            fetch(APPS_SCRIPT_URL + '?' + params.toString())
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        allData = result.data;
+                        displayTable();
+                        displayCalendar();
+                        closeShowModal();
+                        alert('✅ Show updated successfully!');
+                    } else {
+                        throw new Error(result.error || 'Failed to update');
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error saving: ' + error.message);
+                });
+        }
+
+        function saveNewShow() {
+            const formData = getFormData();
+            
+            const params = new URLSearchParams({
+                action: 'addRow',
+                ...formData
+            });
+
+            fetch(APPS_SCRIPT_URL + '?' + params.toString())
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        allData = result.data;
+                        displayTable();
+                        displayCalendar();
+                        closeShowModal();
+                        alert('✅ New show added successfully!');
+                    } else {
+                        throw new Error(result.error || 'Failed to add');
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error adding show: ' + error.message);
+                });
+        }
+
+        function closeShowModal() {
+            document.getElementById('showModal').classList.remove('active');
         }
 
         function displayCalendar() {
@@ -878,13 +1156,13 @@
                 `;
             });
 
-            document.getElementById('modalBody').innerHTML = html;
-            document.getElementById('modal').classList.add('active');
+            document.getElementById('detailsModalBody').innerHTML = html;
+            document.getElementById('detailsModal').classList.add('active');
         }
 
-        function closeModal(event) {
-            if (!event || event.target.id === 'modal') {
-                document.getElementById('modal').classList.remove('active');
+        function closeDetailsModal(event) {
+            if (!event || event.target.id === 'detailsModal') {
+                document.getElementById('detailsModal').classList.remove('active');
             }
         }
 
@@ -965,6 +1243,14 @@
             }
             lastTouchEnd = now;
         }, false);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePasswordModal();
+                closeShowModal();
+                closeDetailsModal();
+            }
+        });
     </script>
 </body>
 </html>
