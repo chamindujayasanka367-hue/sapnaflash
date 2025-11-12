@@ -276,6 +276,8 @@
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .month-section h3 {
@@ -289,6 +291,7 @@
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 5px;
+            min-width: 280px;
         }
 
         .calendar-day-header {
@@ -667,7 +670,7 @@
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbDPsYZYt8KqhaOBRIg41HSf6aweJe00wR7SY8lPfXcFmrT_bFi7jH37myH7lqRQ-8-w/exec'; //
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbDPsYZYt8KqhaOBRIg41HSf6aweJe00wR7SY8lPfXcFmrT_bFi7jH37myH7lqRQ-8-w/exec';
         
         let allData = [];
         let currentDate = new Date();
@@ -800,14 +803,13 @@
                     if (result.success && result.valid) {
                         isPasswordVerified = true;
                         closePasswordModal();
-                        // Edit form එක open කරන්න
+                        
                         if (editingRowIndex !== null) {
                             const index = editingRowIndex;
                             editingRowIndex = null;
                             setTimeout(() => {
                                 const row = allData[index];
                                 
-                                // Date format කරන්න (YYYY-MM-DD format එකට)
                                 let formattedDate = '';
                                 if (row['Booking date']) {
                                     const date = parseDate(row['Booking date']);
@@ -1111,6 +1113,8 @@
                 const advance = parseFloat(booking['Advance payment']) || 0;
                 const toPay = total - advance;
                 
+                const rowIndex = allData.indexOf(booking);
+                
                 html += `
                     ${index > 0 ? '<hr style="margin: 15px 0; border: 1px solid #dee2e6;">' : ''}
                     <div class="detail-row">
@@ -1152,6 +1156,9 @@
                     <div class="detail-row">
                         <div class="detail-label">✅ Status:</div>
                         <div class="detail-value ${statusClass}">${status}</div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-warning" onclick="closeDetailsModal(); openEditModal(${rowIndex});" style="width: 100%;">✏️ Edit This Show</button>
                     </div>
                 `;
             });
