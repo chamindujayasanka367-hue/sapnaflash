@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="si">
 <head>
@@ -631,22 +632,6 @@
         </div>
     </div>
 
-    <!-- Password Modal -->
-    <div id="passwordModal" class="modal">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3>🔒 Enter Password</h3>
-                <button class="close-btn" onclick="closePasswordModal()">&times;</button>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password:</label>
-                <input type="password" id="passwordInput" class="form-control" placeholder="Enter password" onkeypress="if(event.key==='Enter') verifyPassword()">
-            </div>
-            <button class="btn btn-primary" onclick="verifyPassword()" style="width: 100%;">Verify</button>
-            <div id="passwordError" style="color: white; background: #dc3545; padding: 10px; border-radius: 5px; margin-top: 10px; display: none; text-align: center;"></div>
-        </div>
-    </div>
-
     <!-- Add/Edit Show Modal -->
     <div id="showModal" class="modal">
         <div class="modal-content" onclick="event.stopPropagation()">
@@ -675,7 +660,6 @@
         let allData = [];
         let currentDate = new Date();
         let editingRowIndex = null;
-        let isPasswordVerified = false;
 
         window.onload = function() {
             loadData();
@@ -763,7 +747,7 @@
                         <td class="${statusClass}">${status}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-warning btn-sm" onclick="openEditModal(${index})">✏️ Edit</button>
+                                <button class="btn btn-warning btn-sm" onclick="openEditShowModal(${index})">✏️ Edit</button>
                             </div>
                         </td>
                     </tr>
@@ -776,109 +760,67 @@
             document.getElementById('tableView').innerHTML = html;
         }
 
-        function openEditModal(index) {
+        function openEditShowModal(index) {
             editingRowIndex = index;
-            document.getElementById('passwordModal').classList.add('active');
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordError').style.display = 'none';
-        }
-
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.remove('active');
-            editingRowIndex = null;
-        }
-
-        function verifyPassword() {
-            const password = document.getElementById('passwordInput').value;
+            const row = allData[index];
             
-            if (!password) {
-                document.getElementById('passwordError').textContent = 'Please enter password!';
-                document.getElementById('passwordError').style.display = 'block';
-                return;
+            let formattedDate = '';
+            if (row['Booking date']) {
+                const date = parseDate(row['Booking date']);
+                if (date && !isNaN(date)) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    formattedDate = `${year}-${month}-${day}`;
+                }
             }
             
-            fetch(APPS_SCRIPT_URL + '?action=verifyPassword&password=' + encodeURIComponent(password))
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success && result.valid) {
-                        isPasswordVerified = true;
-                        closePasswordModal();
-                        
-                        if (editingRowIndex !== null) {
-                            const index = editingRowIndex;
-                            editingRowIndex = null;
-                            setTimeout(() => {
-                                const row = allData[index];
-                                
-                                let formattedDate = '';
-                                if (row['Booking date']) {
-                                    const date = parseDate(row['Booking date']);
-                                    if (date && !isNaN(date)) {
-                                        const year = date.getFullYear();
-                                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                                        const day = String(date.getDate()).padStart(2, '0');
-                                        formattedDate = `${year}-${month}-${day}`;
-                                    }
-                                }
-                                
-                                const formHtml = `
-                                    <div class="form-group">
-                                        <label class="form-label">📅 Booking Date:</label>
-                                        <input type="date" id="bookingDate" class="form-control" value="${formattedDate}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">📍 Place:</label>
-                                        <input type="text" id="place" class="form-control" value="${row['Place'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">👤 Organizer:</label>
-                                        <input type="text" id="organizer" class="form-control" value="${row['Organizer'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">📞 Mobile Number:</label>
-                                        <input type="tel" id="mobile" class="form-control" value="${row['Mobile number'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">💰 Total Cost:</label>
-                                        <input type="number" id="totalCost" class="form-control" value="${row['Total cost of the concert'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">💵 Advance Payment:</label>
-                                        <input type="number" id="advancePayment" class="form-control" value="${row['Advance payment'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">🔊 Sound Cost:</label>
-                                        <input type="number" id="soundCost" class="form-control" value="${row['Sound cost'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">🔊 Sound Advance:</label>
-                                        <input type="number" id="soundAdvance" class="form-control" value="${row['Sound Advance'] || ''}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">✅ Status:</label>
-                                        <select id="status" class="form-control">
-                                            <option value="Pending" ${(row['Done'] || 'Pending') === 'Pending' ? 'selected' : ''}>Pending</option>
-                                            <option value="Done" ${(row['Done'] || '') === 'Done' ? 'selected' : ''}>Done</option>
-                                        </select>
-                                    </div>
-                                `;
-                                
-                                document.getElementById('showModalTitle').textContent = '✏️ Edit Show';
-                                document.getElementById('showModalBody').innerHTML = formHtml + 
-                                    `<button class="btn btn-primary" onclick="saveEdit(${index})" style="width: 100%; margin-top: 15px;">💾 Save Changes</button>`;
-                                document.getElementById('showModal').classList.add('active');
-                            }, 100);
-                        }
-                    } else {
-                        document.getElementById('passwordError').textContent = '❌ Incorrect password!';
-                        document.getElementById('passwordError').style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('passwordError').textContent = '❌ Error: ' + error.message;
-                    document.getElementById('passwordError').style.display = 'block';
-                    console.error('Password verification error:', error);
-                });
+            const formHtml = `
+                <div class="form-group">
+                    <label class="form-label">📅 Booking Date:</label>
+                    <input type="date" id="bookingDate" class="form-control" value="${formattedDate}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📍 Place:</label>
+                    <input type="text" id="place" class="form-control" value="${row['Place'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">👤 Organizer:</label>
+                    <input type="text" id="organizer" class="form-control" value="${row['Organizer'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📞 Mobile Number:</label>
+                    <input type="tel" id="mobile" class="form-control" value="${row['Mobile number'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💰 Total Cost:</label>
+                    <input type="number" id="totalCost" class="form-control" value="${row['Total cost of the concert'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 Advance Payment:</label>
+                    <input type="number" id="advancePayment" class="form-control" value="${row['Advance payment'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔊 Sound Cost:</label>
+                    <input type="number" id="soundCost" class="form-control" value="${row['Sound cost'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔊 Sound Advance:</label>
+                    <input type="number" id="soundAdvance" class="form-control" value="${row['Sound Advance'] || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">✅ Status:</label>
+                    <select id="status" class="form-control">
+                        <option value="Pending" ${(row['Done'] || 'Pending') === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Done" ${(row['Done'] || '') === 'Done' ? 'selected' : ''}>Done</option>
+                    </select>
+                </div>
+            `;
+            
+            document.getElementById('showModalTitle').textContent = '✏️ Edit Show';
+            document.getElementById('showModalBody').innerHTML = formHtml + 
+                `<button class="btn btn-primary" onclick="saveEdit(${index})" style="width: 100%; margin-top: 15px;">💾 Save Changes</button>`;
+            document.getElementById('showModal').classList.add('active');
         }
 
         function openAddShowModal() {
@@ -1158,7 +1100,7 @@
                         <div class="detail-value ${statusClass}">${status}</div>
                     </div>
                     <div style="margin-top: 15px;">
-                        <button class="btn btn-warning" onclick="closeDetailsModal(); openEditModal(${rowIndex});" style="width: 100%;">✏️ Edit This Show</button>
+                        <button class="btn btn-warning" onclick="closeDetailsModal(); openEditShowModal(${rowIndex});" style="width: 100%;">✏️ Edit This Show</button>
                     </div>
                 `;
             });
@@ -1253,7 +1195,6 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                closePasswordModal();
                 closeShowModal();
                 closeDetailsModal();
             }
